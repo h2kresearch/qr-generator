@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소중한글 테스트 QR</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* 상단에 정렬 */
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #title-container {
+            margin-top: 20px; /* 초기 상단 여백 */
+        }
+        #qr-container {
+            width: 250px;
+            height: 250px;
+            margin-top: 20px;
+        }
+        #qr-code {
+            width: 100%;
+            height: 100%;
+        }
+        #url-container {
+            margin-top: 16px; /* URL 폰트 크기만큼 여백 설정 (기본 폰트 크기 16px) */
+        }
+        h1, p {
+            margin: 10px 0; /* 위아래 여백 조정 */
+        }
+    </style>
+</head>
+<body>
+    <div id="title-container">
+        <h1 id="title">테스트에 참여해 주셔서 감사합니다!</h1>
+    </div>
+    <div id="qr-container">
+        <canvas id="qr-code"></canvas>
+    </div>
+    <div id="url-container">
+        <p>URL: <a id="url" href="#" target="_blank"></a></p>
+    </div>
+    <script>
+        function getParameterByName(name, url = window.location.href) {
+            name = name.replace(/[\[\]]/g, '\\$&');
+            let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        function adjustMargin() {
+            let title = document.getElementById('title');
+            let titleContainer = document.getElementById('title-container');
+            let titleHeight = title.offsetHeight;
+            titleContainer.style.marginTop = `${titleHeight * 2}px`;
+        }
+
+        let url = getParameterByName('url');
+        if (!url) {
+            url = "https://sojunghangeul.com"; // 기본 URL 설정, 필요 시 변경 가능
+        }
+
+        let urlElement = document.getElementById('url');
+        urlElement.textContent = url;
+        urlElement.href = url;
+
+        let qr = new QRious({
+            element: document.getElementById('qr-code'),
+            value: url,
+            size: 250, // 크기 (픽셀 단위)
+            background: '#ffffff', // 배경색
+            foreground: '#000000', // 전경색 (검정색)
+            backgroundAlpha: 1.0, // 배경 투명도
+            foregroundAlpha: 0.8, // 전경 투명도
+            level: 'H' // 오류 수정 레벨 (L, M, Q, H)
+        });
+
+        // 페이지 로드 후 상단 여백 조정
+        window.onload = adjustMargin;
+    </script>
+</body>
+</html>
