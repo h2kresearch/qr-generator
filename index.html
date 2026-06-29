@@ -1,90 +1,521 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>소중한글 테스트 QR</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Generator</title>
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
+        :root {
+            --accent: #EB5022;
+            --accent-hover: #d44419;
+            --accent-soft: rgba(235, 80, 34, 0.12);
+            --bg: #fafaf7;
+            --surface: #ffffff;
+            --text: #1f1f1f;
+            --muted: #6b6b6b;
+            --border: #ece9e3;
+            --shadow: 0 10px 28px rgba(20, 20, 20, 0.06);
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; }
+
+        /* hidden attribute가 author CSS의 display 지정에 의해 무시되지 않도록 강제 */
+        [hidden] { display: none !important; }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+                system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* 상단에 정렬 */
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            text-align: center;
         }
-        #title-container {
-            margin-top: 20px; /* 초기 상단 여백 */
-        }
-        #qr-container {
-            width: 250px;
-            height: 250px;
-            margin-top: 20px;
-        }
-        #qr-code {
+
+        .top-bar {
             width: 100%;
-            height: 100%;
+            max-width: 720px;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            min-height: 64px;
         }
-        #url-container {
-            margin-top: 16px; /* URL 폰트 크기만큼 여백 설정 (기본 폰트 크기 16px) */
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            padding: 8px 12px;
+            margin-left: -12px;
+            border-radius: 10px;
+            color: var(--muted);
+            font-size: 15px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
         }
-        h1, p {
-            margin: 10px 0; /* 위아래 여백 조정 */
+        .back-btn:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--text);
+        }
+        .back-btn svg { width: 18px; height: 18px; }
+
+        main {
+            width: 100%;
+            max-width: 560px;
+            padding: 0 24px 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ===== Main screen ===== */
+        #home { width: 100%; padding-top: 4vh; }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 32px;
+        }
+        .brand .logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: var(--accent);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 8px 18px rgba(235, 80, 34, 0.28);
+        }
+        .brand .logo svg { width: 28px; height: 28px; }
+        .brand h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 14px 0 0;
+            letter-spacing: -0.02em;
+        }
+        .brand p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .card {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .form { display: flex; flex-direction: column; gap: 12px; }
+        .form label {
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+        .form input[type="url"] {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #fff;
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--text);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .form input[type="url"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        .form .error {
+            min-height: 18px;
+            font-size: 13px;
+            color: var(--accent);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.08s ease;
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-primary:active { transform: translateY(1px); }
+
+        .hint {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .hint code {
+            background: rgba(0, 0, 0, 0.04);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        /* ===== Result screen ===== */
+        #result {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 360px;
+        }
+        .qr-frame {
+            width: 256px;
+            height: 256px;
+            padding: 12px;
+            background: #fff;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+        }
+        .qr-frame canvas {
+            display: block;
+            width: 232px;
+            height: 232px;
+        }
+
+        .url-display {
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .url-display a {
+            color: var(--text);
+            text-decoration: none;
+        }
+        .url-display a:hover { color: var(--accent); }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+        }
+        .btn-ghost {
+            flex: 1 1 0;
+            min-width: 0;
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 12px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text);
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+        .btn-ghost svg { width: 16px; height: 16px; }
+
+        .footer-note {
+            margin-top: 24px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        @media (max-width: 480px) {
+            #home { padding-top: 2vh; }
+            .brand h1 { font-size: 24px; }
+            .qr-frame { width: 224px; height: 224px; }
+            .qr-frame canvas { width: 200px; height: 200px; }
         }
     </style>
 </head>
 <body>
-    <div id="title-container">
-        <h1 id="title">테스트에 참여해 주셔서 감사합니다!</h1>
-    </div>
-    <div id="qr-container">
-        <canvas id="qr-code"></canvas>
-    </div>
-    <div id="url-container">
-        <p>URL: <a id="url" href="#" target="_blank"></a></p>
-    </div>
+    <header class="top-bar">
+        <button id="back-btn" class="back-btn" hidden type="button" aria-label="뒤로가기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" />
+            </svg>
+            <span>뒤로</span>
+        </button>
+    </header>
+
+    <main>
+        <section id="home" class="screen" hidden>
+            <div class="brand">
+                <div class="logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <path d="M14 14h3v3h-3zM18 18h3v3h-3z" />
+                    </svg>
+                </div>
+                <h1>QR Generator</h1>
+            </div>
+
+            <div class="card">
+                <form id="qr-form" class="form" autocomplete="off" novalidate>
+                    <label for="url-input">URL</label>
+                    <input id="url-input" name="url" type="url" inputmode="url"
+                        placeholder="https://example.com" required />
+                    <div id="form-error" class="error" role="alert" aria-live="polite"></div>
+                    <button class="btn-primary" type="submit">QR 코드 생성</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="result" class="screen" hidden>
+            <div class="qr-card">
+                <div class="qr-frame">
+                    <canvas id="qr-code"></canvas>
+                </div>
+                <div class="url-display">
+                    <a id="result-url" target="_blank" rel="noopener noreferrer"></a>
+                </div>
+                <div class="actions">
+                    <button id="open-btn" class="btn-ghost" type="button" title="새 탭에서 URL 열기">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M14 3h7v7" />
+                            <path d="M10 14L21 3" />
+                            <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
+                        </svg>
+                        <span>링크 열기</span>
+                    </button>
+                    <button id="copy-btn" class="btn-ghost" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="9" y="9" width="11" height="11" rx="2" />
+                            <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+                        </svg>
+                        <span id="copy-label">URL 복사</span>
+                    </button>
+                    <button id="download-btn" class="btn-ghost" type="button" title="QR 코드를 PNG로 저장">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        <span>다운로드</span>
+                    </button>
+                </div>
+            </div>
+            <p class="footer-note">스마트폰 카메라로 QR 코드를 스캔해 보세요.</p>
+        </section>
+    </main>
+
     <script>
-        function getParameterByName(name, url = window.location.href) {
-            name = name.replace(/[\[\]]/g, '\\$&');
-            let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        const homeEl = document.getElementById('home');
+        const resultEl = document.getElementById('result');
+        const backBtn = document.getElementById('back-btn');
+        const form = document.getElementById('qr-form');
+        const urlInput = document.getElementById('url-input');
+        const formError = document.getElementById('form-error');
+        const resultUrl = document.getElementById('result-url');
+        const qrCanvas = document.getElementById('qr-code');
+        const openBtn = document.getElementById('open-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const copyLabel = document.getElementById('copy-label');
+        const downloadBtn = document.getElementById('download-btn');
+
+        let qr = null;
+        let copyResetTimer = null;
+
+        function getUrlParam(search = window.location.search) {
+            return new URLSearchParams(search).get('url');
         }
 
-        function adjustMargin() {
-            let title = document.getElementById('title');
-            let titleContainer = document.getElementById('title-container');
-            let titleHeight = title.offsetHeight;
-            titleContainer.style.marginTop = `${titleHeight * 2}px`;
+        function isSafeUrl(value) {
+            if (!value) return false;
+            try {
+                const u = new URL(value);
+                return u.protocol === 'http:' || u.protocol === 'https:';
+            } catch (_) {
+                return false;
+            }
         }
 
-        let url = getParameterByName('url');
-        if (!url) {
-            url = "https://github.com"; // 기본 URL 설정, 필요 시 변경 가능
+        function normalizeUrl(value) {
+            const trimmed = (value || '').trim();
+            if (!trimmed) return '';
+            if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed)) return trimmed;
+            return 'https://' + trimmed;
         }
 
-        let urlElement = document.getElementById('url');
-        urlElement.textContent = url;
-        urlElement.href = url;
+        // QR code module density grows with both URL length and error correction level.
+        // Lower EC for longer URLs so modules stay visually chunky and easy to scan on screen.
+        function pickQrLevel(url) {
+            const len = url.length;
+            if (len <= 50) return 'H';
+            if (len <= 100) return 'Q';
+            if (len <= 200) return 'M';
+            return 'L';
+        }
 
-        let qr = new QRious({
-            element: document.getElementById('qr-code'),
-            value: url,
-            size: 250, // 크기 (픽셀 단위)
-            background: '#ffffff', // 배경색
-            foreground: '#000000', // 전경색 (검정색)
-            backgroundAlpha: 1.0, // 배경 투명도
-            foregroundAlpha: 0.8, // 전경 투명도
-            level: 'H' // 오류 수정 레벨 (L, M, Q, H)
+        function showHome() {
+            homeEl.hidden = false;
+            resultEl.hidden = true;
+            backBtn.hidden = true;
+            document.title = 'QR Generator';
+            formError.textContent = '';
+            setTimeout(() => urlInput.focus(), 0);
+        }
+
+        function showResult(url) {
+            homeEl.hidden = true;
+            resultEl.hidden = false;
+            backBtn.hidden = false;
+            document.title = 'QR · ' + url;
+
+            resultUrl.textContent = url;
+            resultUrl.href = url;
+            resultUrl.title = url;
+
+            qr = new QRious({
+                element: qrCanvas,
+                value: url,
+                size: 512,
+                background: '#ffffff',
+                foreground: '#1f1f1f',
+                level: pickQrLevel(url),
+                padding: 0
+            });
+
+            copyLabel.textContent = 'URL 복사';
+            if (copyResetTimer) {
+                clearTimeout(copyResetTimer);
+                copyResetTimer = null;
+            }
+        }
+
+        function route() {
+            const raw = getUrlParam();
+            if (raw && isSafeUrl(raw)) {
+                showResult(raw);
+            } else {
+                showHome();
+            }
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            formError.textContent = '';
+            const normalized = normalizeUrl(urlInput.value);
+            if (!isSafeUrl(normalized)) {
+                formError.textContent = '올바른 http(s) URL을 입력해 주세요.';
+                urlInput.focus();
+                return;
+            }
+            const next = new URL(window.location.href);
+            next.searchParams.set('url', normalized);
+            history.pushState({ fromGenerate: true, url: normalized }, '', next.toString());
+            showResult(normalized);
         });
 
-        // 페이지 로드 후 상단 여백 조정
-        window.onload = adjustMargin;
+        backBtn.addEventListener('click', () => {
+            if (history.state && history.state.fromGenerate) {
+                history.back();
+                return;
+            }
+            const next = new URL(window.location.href);
+            next.searchParams.delete('url');
+            history.replaceState({}, '', next.toString());
+            showHome();
+        });
+
+        window.addEventListener('popstate', route);
+
+        openBtn.addEventListener('click', () => {
+            const url = resultUrl.href;
+            if (!url) return;
+            window.open(url, '_blank', 'noopener,noreferrer');
+        });
+
+        copyBtn.addEventListener('click', async () => {
+            const value = resultUrl.href;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(value);
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = value;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                }
+                copyLabel.textContent = '복사됨';
+            } catch (_) {
+                copyLabel.textContent = '복사 실패';
+            }
+            if (copyResetTimer) clearTimeout(copyResetTimer);
+            copyResetTimer = setTimeout(() => {
+                copyLabel.textContent = 'URL 복사';
+            }, 1500);
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            if (!qrCanvas) return;
+            const link = document.createElement('a');
+            link.download = 'qr-code.png';
+            link.href = qrCanvas.toDataURL('image/png');
+            link.click();
+        });
+
+        route();
     </script>
 </body>
 </html>
